@@ -21,9 +21,15 @@
     <ClCompile Include="BigInt.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="BigFloat.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigInt.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="BigFloat.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

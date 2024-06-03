@@ -1,12 +1,14 @@
 #include <iostream>
-#include "BigInt.h" 
+#include "BigFloat.h" 
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
-    BigInt a("512");
+    BigInt a("512");//14002965526155144834555305452685214372866
     BigInt b("512");
+    BigInt c("3");
     BigInt result = a^b;
+    result = result/c;
     result.print();
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -24,3 +26,29 @@ int main() {
 #endif
 
 }
+
+//int main() {
+//    BigFloat num2("123.656789123456789123456789123456789123456789123456789");//123.656789123456789123456789123456789123456789123456789
+//    BigFloat num1("987.96543219");//987.9654321987654321987654321987654321987654321987654321
+//
+//     BigFloat resultAdd = num1 + num2;
+//     BigFloat resultSub = num1 - num2;
+//    BigFloat resultMul = num1 * num2;
+//    BigFloat resultDiv = num1 / num2;
+//    BigInt a("987");//14002965526155144834555305452685214372866
+//    BigInt b("123");
+//    BigInt result = a / b;
+//    std::cout << "qwe" << std::endl;
+//       result.print();
+//     
+//    std::cout << "Addition: ";
+//     resultAdd.print();
+//    std::cout << "Subtraction: ";
+//     resultSub.print();
+//    std::cout << "Multiplication: ";
+//    resultMul.print();
+//    std::cout << "Division: ";
+//    resultDiv.print();
+//
+//    return 0;
+//}

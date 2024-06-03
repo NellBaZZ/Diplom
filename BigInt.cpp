@@ -5,6 +5,7 @@ BigInt zero("0");
 BigInt one("1");
 BigInt two("2");
 
+// Строка делится на вектора по 9 цифр
 BigInt::BigInt(const std::string& numStr) {
     for (int i = numStr.size(); i > 0; i -= 9) {
         if (i < 9) {
@@ -20,6 +21,7 @@ BigInt::BigInt(std::vector<uint32_t>::const_iterator begin, std::vector<uint32_t
     digits.assign(begin, end);
 }
 
+// принт
 void BigInt::print() const {
     bool first = true;
     for (auto it = digits.rbegin(); it != digits.rend(); ++it) {
@@ -34,6 +36,7 @@ void BigInt::print() const {
     std::cout << std::endl;
 }
 
+// подсчет кол-ва цифр
 size_t BigInt::countDigits() const {
     if (digits.empty()) {
         return 0;
@@ -127,12 +130,19 @@ BigInt BigInt::operator-(const BigInt& other) const {
 }
 
 BigInt BigInt::operator%(const BigInt& divisor) const {
-    BigInt result = *this;
-    while (result >= divisor) {
-        result = result - divisor;
-    }
-    return result;
+    //BigInt result = *this;
+    //while (result >= divisor) {
+    //    result = result - divisor;
+    //}
+    //return result;
+
+
+    BigInt quotient = *this / divisor;
+    BigInt product = quotient * divisor;
+    BigInt remainder = subtract(*this, product);
+    return remainder;
 }
+
 
 void BigInt::removeLeadingZeros() {
     while (digits.size() > 1 && digits.back() == 0) {
@@ -143,15 +153,16 @@ void BigInt::removeLeadingZeros() {
 // Сложение - С avx-512
 BigInt add(const BigInt& a, const BigInt& b) {
     if ((a.digits.size() == 0) && (b.digits.size() == 0)) {
-        return BigInt(); // Возвращаем пустой BigInt
+        return BigInt(); // возвращается пустой объект
     }
     else if (a.digits.size() == 0) {
-        return b; // Возвращаем пустой BigInt
+        return b; 
     }
     else if (b.digits.size() == 0) {
-        return a; // Возвращаем пустой BigInt
+        return a; 
     }
 
+    // определяется макс размер для результата
     size_t maxSize = std::max(a.digits.size(), b.digits.size());
     BigInt result;
     result.digits.resize(maxSize + 1);
@@ -159,6 +170,7 @@ BigInt add(const BigInt& a, const BigInt& b) {
     uint32_t carry = 0;
     size_t i = 0;
 
+    // за раз обрабатывается 16 32-битных чисел
     for (; i + 15 < maxSize; i += 16) {
         __m512i v_a = _mm512_loadu_si512(reinterpret_cast<const __m512i*>(a.digits.data() + std::min(i, a.digits.size() - 16)));
         __m512i v_b = _mm512_loadu_si512(reinterpret_cast<const __m512i*>(b.digits.data() + std::min(i, b.digits.size() - 16)));
@@ -176,6 +188,7 @@ BigInt add(const BigInt& a, const BigInt& b) {
         }
     }
 
+    // обработка оставшихся элементов, если кол-во цифр не кратно 16
     for (; i < maxSize; ++i) {
         uint64_t sum = carry;
         if (i < a.digits.size()) sum += a.digits[i];
@@ -184,6 +197,9 @@ BigInt add(const BigInt& a, const BigInt& b) {
         carry = sum / 1000000000;
     }
 
+    // eсли после завершения остался перенос, он добавляется как новый элемент в result.digits 
+    //Если переноса нет, последний элемент вектора удаляется, так как он инициализировался нулём в началe
+
     if (carry > 0) {
         result.digits[i] = carry;
     }
@@ -191,6 +207,7 @@ BigInt add(const BigInt& a, const BigInt& b) {
         result.digits.pop_back();
     }
 
+    // удаление ведущих нулей
     while (result.digits.size() > 1 && result.digits.back() == 0) {
         result.digits.pop_back();
     }
@@ -230,12 +247,12 @@ BigInt subtract(const BigInt& a, const BigInt& b) {
 
     size_t avxSize = maxSize / 16;
     size_t i = 0;
-    __m512i borrow = _mm512_setzero_si512();
+    __m512i borrow = _mm512_setzero_si512();//  вектор нулей для отслеживания заимствования
 
     std::vector<uint32_t> a_digits = a.digits;
     std::vector<uint32_t> b_digits = b.digits;
 
-    if (b.digits.size() < maxSize) {
+    if (b.digits.size() < maxSize) {// если вектор б меньше. чем а, то дополняется нулями
         b_digits.resize(maxSize, 0);
     }
 
@@ -358,49 +375,116 @@ BigInt BigInt::pow(const BigInt& exponent) const {
     return result;
 }
 
-// Целочисленное деление в столбик
+
+
+
 BigInt BigInt::operator/(const BigInt& divisor) const {
-    if (divisor == zero) {
-        throw std::overflow_error("Divide by zero exception");
+    BigInt remainder;
+    return divide(divisor, remainder);
+}
+
+std::string BigInt::toString() const {
+    std::ostringstream oss;
+    bool first = true;
+    for (auto it = digits.rbegin(); it != digits.rend(); ++it) {
+        if (first) {
+            oss << *it;
+            first = false;
+        }
+        else {
+            oss << std::setw(9) << std::setfill('0') << *it;
+        }
+    }
+    return oss.str();
+}
+
+
+BigInt BigInt::mod(const BigInt& other) const {
+    BigInt quotient;
+    BigInt remainder;
+    divide(other, remainder);
+    return remainder;
+}
+
+BigInt BigInt::divide(const BigInt& divisor, BigInt& remainder) const {
+    if (divisor == BigInt("0")) {
+        throw std::invalid_argument("Division by zero");
     }
 
     BigInt dividend = *this;
-    BigInt result("0");
+    BigInt quotient;
+    quotient.digits.resize(dividend.digits.size(), 0);
 
-    int normalizationShift = 9 - std::to_string(divisor.digits.back()).length();
-    BigInt normalizedDivisor = divisor;
-    normalizedDivisor.digits.insert(normalizedDivisor.digits.begin(), normalizationShift, 0);
+    BigInt current;
+    for (int i = dividend.digits.size() - 1; i >= 0; --i) {
+        current.digits.insert(current.digits.begin(), dividend.digits[i]);
+        current.removeLeadingZeros();
 
-    BigInt normalizedDividend = dividend;
-    normalizedDividend.digits.insert(normalizedDividend.digits.begin(), normalizationShift, 0);
-
-    for (int i = normalizedDividend.digits.size() - normalizedDivisor.digits.size(); i >= 0; --i) {
-        BigInt dividendSegment(
-            normalizedDividend.digits.begin() + i,
-            normalizedDividend.digits.begin() + i + normalizedDivisor.digits.size()
-        );
-
-        uint32_t quotientEstimate = dividendSegment.digits.back() / normalizedDivisor.digits.back();
-        BigInt quotientPart(std::to_string(quotientEstimate));
-
-        BigInt product = normalizedDivisor * quotientPart;
-        while (dividendSegment < product) {
-            quotientEstimate--;
-            quotientPart = BigInt(std::to_string(quotientEstimate));
-            product = karatsuba(normalizedDivisor, quotientPart);
+        uint32_t x = 0, left = 0, right = 1000000000;
+        while (left <= right) {
+            uint32_t mid = (left + right) / 2;
+            BigInt midVal = divisor.multiply(BigInt(std::to_string(mid)));
+            if (midVal <= current) {
+                x = mid;
+                left = mid + 1;
+            }
+            else {
+                right = mid - 1;
+            }
         }
 
-        dividendSegment = subtract(dividendSegment, product);
-        std::copy(dividendSegment.digits.begin(), dividendSegment.digits.end(), normalizedDividend.digits.begin() + i);
-
-        result.digits.push_back(quotientEstimate);
+        quotient.digits[i] = x;
+        current = current - divisor.multiply(BigInt(std::to_string(x)));
     }
 
-    std::reverse(result.digits.begin(), result.digits.end());
-    result.removeLeadingZeros();
-    
- //   BigInt mod = dividend % divisor;
-    return result;
-
+    quotient.removeLeadingZeros();
+    remainder = current;
+    return quotient;
 }
+//BigInt BigInt::operator/(const BigInt& divisor) const {
+//    if (divisor == zero) {
+//        throw std::overflow_error("Divide by zero exception");
+//    }
+//
+//    BigInt dividend = *this;
+//    BigInt result("0");
+//
+//    int normalizationShift = 9 - std::to_string(divisor.digits.back()).length();
+//    BigInt normalizedDivisor = divisor;
+//    normalizedDivisor.digits.insert(normalizedDivisor.digits.begin(), normalizationShift, 0);
+//
+//    BigInt normalizedDividend = dividend;
+//    normalizedDividend.digits.insert(normalizedDividend.digits.begin(), normalizationShift, 0);
+//
+//    for (int i = normalizedDividend.digits.size() - normalizedDivisor.digits.size(); i >= 0; --i) {
+//        BigInt dividendSegment(
+//            normalizedDividend.digits.begin() + i,
+//            normalizedDividend.digits.begin() + i + normalizedDivisor.digits.size()
+//        );
+//
+//        uint32_t quotientEstimate = dividendSegment.digits.back() / normalizedDivisor.digits.back();
+//        BigInt quotientPart(std::to_string(quotientEstimate));
+//
+//        BigInt product = normalizedDivisor * quotientPart;
+//        while (dividendSegment < product) {
+//            quotientEstimate--;
+//            quotientPart = BigInt(std::to_string(quotientEstimate));
+//            product = karatsuba(normalizedDivisor, quotientPart);
+//        }
+//
+//        dividendSegment = subtract(dividendSegment, product);
+//        std::copy(dividendSegment.digits.begin(), dividendSegment.digits.end(), normalizedDividend.digits.begin() + i);
+//
+//        result.digits.push_back(quotientEstimate);
+//    }
+//
+//    std::reverse(result.digits.begin(), result.digits.end());
+//    result.removeLeadingZeros();
+//
+//    BigInt remainder = normalizedDividend; // Остаток после деления
+//    remainder.removeLeadingZeros();
+//
+//    return result;
+//}
+
 

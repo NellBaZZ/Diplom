@@ -11,21 +11,27 @@
 #include <cmath>
 #include <chrono>
 #include <immintrin.h>
+#include <sstream>
 
 class BigInt {
 public:
     std::vector<uint32_t> digits;
 
-    BigInt() = default;
-    BigInt(const std::string& numStr);
-    BigInt(std::vector<uint32_t>::const_iterator begin, std::vector<uint32_t>::const_iterator end);
+    BigInt() = default; // конструктор по дефолту
+    BigInt(const std::string& numStr); // конструктор предствалящий число строкой
+    BigInt(std::vector<uint32_t>::const_iterator begin, std::vector<uint32_t>::const_iterator end); // конструктор, который инициализирует класс диапазоном элементов вектора
 
-
+    // функции
     void print() const;
     BigInt multiply(const BigInt& other) const;
+    BigInt divide(const BigInt& divisor, BigInt& remainder) const;
     BigInt pow(const BigInt& exponent) const;
+    BigInt mod(const BigInt& other) const;
     size_t countDigits() const;
 
+    std::string toString() const; // Добавление метода toString
+
+    // арифметические операторы
     BigInt operator+(const BigInt& other) const;
     BigInt operator-(const BigInt& other) const;
     BigInt operator*(const BigInt& other) const;
@@ -33,6 +39,7 @@ public:
     BigInt operator%(const BigInt& other) const;
     BigInt operator^(const BigInt& other) const;
 
+    // операторы сравнения
     bool operator>(const BigInt& other) const;
     bool operator==(const BigInt& other) const;
     bool operator!=(const BigInt& other) const;
@@ -47,8 +54,8 @@ private:
 
 BigInt add(const BigInt& a, const BigInt& b);
 BigInt addSimple(const BigInt& a, const BigInt& b);
-BigInt subtract(const BigInt& a, const BigInt& b);
-BigInt shift_left(const BigInt& num, size_t n);
+BigInt subtract(const BigInt& a, const BigInt& b); 
+BigInt shift_left(const BigInt& num, size_t n); // сдвиг числа влево на n позиций
 BigInt karatsuba(const BigInt& x, const BigInt& y);
 
 #endif // BIGINT_H

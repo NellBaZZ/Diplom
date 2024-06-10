@@ -16,6 +16,7 @@
 class BigInt {
 public:
     std::vector<uint32_t> digits;
+    std::chrono::duration<double> duration;
 
     BigInt() = default; // конструктор по дефолту
     BigInt(const std::string& numStr); // конструктор предствалящий число строкой
@@ -46,15 +47,16 @@ public:
     bool operator<=(const BigInt& other) const;
     bool operator>=(const BigInt& other) const;
     bool operator<(const BigInt& other) const;
-
-private:
     void removeLeadingZeros();
+private:
+   // void removeLeadingZeros();
   
 };
 
 BigInt add(const BigInt& a, const BigInt& b);
 BigInt addSimple(const BigInt& a, const BigInt& b);
 BigInt subtract(const BigInt& a, const BigInt& b); 
+BigInt subtractSimple(const BigInt& a, const BigInt& b);
 BigInt shift_left(const BigInt& num, size_t n); // сдвиг числа влево на n позиций
 BigInt karatsuba(const BigInt& x, const BigInt& y);
 

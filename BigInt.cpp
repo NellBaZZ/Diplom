@@ -99,22 +99,7 @@ BigInt BigInt::operator*(const BigInt& other) const {
     return multiply(other);
 }
 
-//BigInt BigInt::operator-(const BigInt& other) const {
-//    BigInt result = *this;
-//    int64_t carry = 0;
-//    for (size_t i = 0; i < other.digits.size() || carry != 0; ++i) {
-//        result.digits[i] -= carry + (i < other.digits.size() ? other.digits[i] : 0);
-//        if (result.digits[i] < 0) {
-//            carry = 1;
-//            result.digits[i] += 1000000000;
-//        }
-//        else {
-//            carry = 0;
-//        }
-//    }
-//    result.removeLeadingZeros();
-//    return result;
-//}
+
 BigInt BigInt::operator+(const BigInt& other) const {
     return add(*this, other);
 }
@@ -226,7 +211,7 @@ BigInt addSimple(const BigInt& a, const BigInt& b) {
         uint64_t sum = carry;
         if (i < a.digits.size()) sum += a.digits[i];
         if (i < b.digits.size()) sum += b.digits[i];
-        result.digits[i] = sum % 1000000000;
+        result.digits[i] = sum % 1000000000;//1000000000;
         carry = sum / 1000000000;
     }
 
@@ -290,6 +275,25 @@ BigInt subtract(const BigInt& a, const BigInt& b) {
         result.digits.pop_back();
     }
 
+    return result;
+}
+
+BigInt subtractSimple(const BigInt& a, const BigInt& b) {
+    BigInt result = a;
+    int64_t carry = 0;
+
+    for (size_t i = 0; i < b.digits.size() || carry != 0; ++i) {
+        result.digits[i] -= carry + (i < b.digits.size() ? b.digits[i] : 0);
+        if (result.digits[i] < 0) {
+            carry = 1;
+            result.digits[i] += 1000000000;
+        }
+        else {
+            carry = 0;
+        }
+    }
+
+    result.removeLeadingZeros();
     return result;
 }
 

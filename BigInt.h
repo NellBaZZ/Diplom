@@ -16,7 +16,6 @@
 class BigInt {
 public:
     std::vector<uint32_t> digits;
-    std::chrono::duration<double> duration;
 
     BigInt() = default; // конструктор по дефолту
     BigInt(const std::string& numStr); // конструктор предствалящий число строкой

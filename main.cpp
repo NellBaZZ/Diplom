@@ -55,7 +55,7 @@ int main() {
     std::cout << "Multuly..."; to_csv("mul.csv", [](BigInt x, BigInt y) {return x * y; }, 1 << 5, 1 << 12); std::cout << "Done.\n";
     std::cout << "Karatsuba..."; to_csv("kar.csv", karatsuba, 1 << 5, 1 << 12); std::cout << "Done.\n";
     std::cout << "Division..."; to_csv("div.csv", [](BigInt x, BigInt y) {return x / y; }, 1 << 8, 1 << 9); std::cout << "Done.\n";
-    std::cout << "Pow..."; to_csv("pow.csv", [](BigInt x, BigInt y) {return x.pow(y); }, 1 << 2, 1 << 4); std::cout << "Done.\n";
+    std::cout << "Pow..."; to_csv("pow.csv", [](BigInt x, BigInt y) {return x.pow(y); }, 1 << 2, 1 << 8); std::cout << "Done.\n";
 
 #ifdef __clang__
     std::cout << "Compiled with Clang " << __clang_version__ << std::endl;

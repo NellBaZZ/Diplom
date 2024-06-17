@@ -26,6 +26,7 @@ public:
     BigInt multiply(const BigInt& other) const;
     BigInt divide(const BigInt& divisor, BigInt& remainder) const;
     BigInt pow(const BigInt& exponent) const;
+	BigInt powmod(const BigInt& exponent, const BigInt& mod) const;
     BigInt mod(const BigInt& other) const;
     size_t countDigits() const;
 
@@ -47,6 +48,16 @@ public:
     bool operator>=(const BigInt& other) const;
     bool operator<(const BigInt& other) const;
     void removeLeadingZeros();
+
+	inline BigInt& operator+=(const BigInt& r) {return *this = *this + r;}
+	inline BigInt& operator++() {return *this += BigInt("1");}
+	inline BigInt operator++(int) {auto old = *this; *this += BigInt("1"); return old;}
+	inline BigInt& operator-=(const BigInt& r) {return *this = *this + r;}
+	inline BigInt& operator--() {return *this -= BigInt("1");}
+	inline BigInt operator--(int) {auto old = *this; *this -= BigInt("1"); return old;}
+	inline BigInt& operator*=(const BigInt& r) {return *this = *this * r;}
+	inline BigInt& operator/=(const BigInt& r) {return *this = *this / r;}
+	inline BigInt& operator%=(const BigInt& r) {return *this = *this % r;}
 private:
    // void removeLeadingZeros();
   
@@ -58,5 +69,9 @@ BigInt subtract(const BigInt& a, const BigInt& b);
 BigInt subtractSimple(const BigInt& a, const BigInt& b);
 BigInt shift_left(const BigInt& num, size_t n); // сдвиг числа влево на n позиций
 BigInt karatsuba(const BigInt& x, const BigInt& y);
+
+inline BigInt operator""_bi(const char* val) {
+	return BigInt(val);
+}
 
 #endif // BIGINT_H

@@ -47,15 +47,20 @@ void to_csv(std::filesystem::path file, auto f, std::size_t min_mmword_size, std
     to_csv(os, f, sizes);
 }
 
-
+#define STR2(X) #X
+#define STR(X) STR2(X)
+#define verify(f) do {if (!(f)) {std::cerr << "Failure at " << __FILE__ << ", line " << __LINE__ << ": " << STR(f) << '\n'; std::exit(__LINE__);}} while(false)
 
 int main() {
-    std::cout << "Addition..."; to_csv("add.csv", [](BigInt x, BigInt y) {return x + y; }, 1 << 12, 1 << 22); std::cout << "Done.\n";
+    /*std::cout << "Addition..."; to_csv("add.csv", [](BigInt x, BigInt y) {return x + y; }, 1 << 12, 1 << 22); std::cout << "Done.\n";
     std::cout << "Subtraction..."; to_csv("sub.csv", [](BigInt x, BigInt y) {return x - y; }, 1 << 12, 1 << 22); std::cout << "Done.\n";
     std::cout << "Multuly..."; to_csv("mul.csv", [](BigInt x, BigInt y) {return x * y; }, 1 << 5, 1 << 12); std::cout << "Done.\n";
     std::cout << "Karatsuba..."; to_csv("kar.csv", karatsuba, 1 << 5, 1 << 12); std::cout << "Done.\n";
-    std::cout << "Division..."; to_csv("div.csv", [](BigInt x, BigInt y) {return x / y; }, 1 << 8, 1 << 9); std::cout << "Done.\n";
-    std::cout << "Pow..."; to_csv("pow.csv", [](BigInt x, BigInt y) {return x.pow(y); }, 1 << 2, 1 << 8); std::cout << "Done.\n";
+    std::cout << "Division..."; to_csv("div.csv", [](BigInt x, BigInt y) {return x / y; }, 1 << 8, 1 << 9); std::cout << "Done.\n";*/
+    //std::cout << "Pow..."; to_csv("pow.csv", [](BigInt x, BigInt y) {return x.pow(y); }, 1, 1 << 4); std::cout << "Done.\n";
+	auto m = 2_bi.pow(8192_bi);
+	m.print();
+    std::cout << "Powmod..."; to_csv("powmod.csv", [&m](BigInt x, BigInt y) {return x.powmod(y, m); }, 1, 1 << 4); std::cout << "Done.\n";
 
 #ifdef __clang__
     std::cout << "Compiled with Clang " << __clang_version__ << std::endl;

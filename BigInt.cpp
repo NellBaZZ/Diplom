@@ -120,7 +120,9 @@ BigInt BigInt::operator%(const BigInt& divisor) const {
     //    result = result - divisor;
     //}
     //return result;
-
+	/*BigInt r;
+	divide(*this, r);
+	return r;*/
 
     BigInt quotient = *this / divisor;
     BigInt product = quotient * divisor;
@@ -379,6 +381,28 @@ BigInt BigInt::pow(const BigInt& exponent) const {
     return result;
 }
 
+BigInt BigInt::powmod(const BigInt& exponent, const BigInt& mod) const {
+    BigInt base = *this;
+    BigInt exp = exponent;
+    if (exp == zero) {
+        return one;
+    }
+    else if (exp == one) {
+        return base;
+    }
+    BigInt result("1");
+
+    while (exp > zero) {
+        if ((exp.digits[0] % 2) == 1) {
+            //result = karatsuba(result, base) % mod;
+			result = (result * base) % mod;
+        }
+        base = (base * base) % mod;
+        exp = exp / two;
+    }
+
+    return result;
+}
 
 
 
